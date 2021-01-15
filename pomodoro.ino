@@ -9,6 +9,10 @@
 #define PRESS_LATENCY 200UL
 #define BUZZER_PIN 12
 
+#define BAUD_RATE 115200
+
+#define DEBUG_PIN 10
+
 led4_t clockLed;
 byte display[4] = {charToCode('-'), charToCode('-'), charToCode('-'), charToCode('-')};
 
@@ -16,7 +20,7 @@ volatile bool isTimerOn = false;
 volatile bool shouldPlayTune = false;
 volatile long timerSetTs = 0L;
 
-const long timerDurationSec = 25 * 60; // 25min
+long timerDurationSec = 25 * 60; // 25min
 uint16_t timersDone = 0;
 
 void setDisplay(byte d1, byte d2, byte d3, byte d4)
@@ -165,7 +169,14 @@ void setup()
     timerDonePlayer.curNote = -1;
     timerDonePlayer.curNoteStartedTs = 0;
 
-    Serial.begin(9600);
+    pinMode(DEBUG_PIN, INPUT_PULLUP);
+    bool isDebugOn = digitalRead(DEBUG_PIN) == LOW;
+    if (isDebugOn)
+    {
+        timerDurationSec = 3;
+    }
+
+    Serial.begin(BAUD_RATE);
 }
 
 void loop()
