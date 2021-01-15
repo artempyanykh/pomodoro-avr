@@ -1,13 +1,13 @@
 #include <pitches.h>
 #include "led4.h"
 
-#define DISP_VAL 8
-#define DISP_LATCH 7
-#define DISP_CLOCK 4
+#define CLOCK_DATA_PIN 8
+#define CLOCK_LATCH_PIN 7
+#define CLOCK_CLOCK_PIN 4
 
-#define BUTTON 2
+#define START_BUTTON_PIN 2
 #define PRESS_LATENCY 200UL
-#define BUZZ 12
+#define BUZZER_PIN 12
 
 led4_t clockLed;
 byte display[4] = {NA_CHAR, NA_CHAR, NA_CHAR, NA_CHAR};
@@ -91,7 +91,7 @@ void play(struct player *player, long curTs)
 {
     if (!shouldPlayTune)
     {
-        noTone(BUZZ);
+        noTone(BUZZER_PIN);
         return;
     }
 
@@ -101,12 +101,12 @@ void play(struct player *player, long curTs)
         player->curNoteStartedTs = curTs;
         const struct note *newNote = &player->tune->notes[player->curNote];
         long newNoteDurationMillis = player->barSizeMillis / newNote->duration;
-        tone(BUZZ, newNote->pitch, newNoteDurationMillis);
+        tone(BUZZER_PIN, newNote->pitch, newNoteDurationMillis);
     }
 
     if (player->curNote >= player->tune->n_notes)
     {
-        noTone(BUZZ);
+        noTone(BUZZER_PIN);
         shouldPlayTune = false;
         return;
     }
@@ -120,7 +120,7 @@ void play(struct player *player, long curTs)
         player->curNoteStartedTs = curTs;
         const struct note *newNote = &player->tune->notes[player->curNote];
         long newNoteDurationMillis = player->barSizeMillis / newNote->duration;
-        tone(BUZZ, newNote->pitch, newNoteDurationMillis);
+        tone(BUZZER_PIN, newNote->pitch, newNoteDurationMillis);
     }
 }
 
@@ -154,13 +154,13 @@ void startTimer()
 
 void setup()
 {
-    led4Init(&clockLed, DISP_VAL, DISP_LATCH, DISP_CLOCK, display);
+    led4Init(&clockLed, CLOCK_DATA_PIN, CLOCK_LATCH_PIN, CLOCK_CLOCK_PIN, display);
 
-    pinMode(BUTTON, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(BUTTON), startTimer, FALLING);
+    pinMode(START_BUTTON_PIN, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(START_BUTTON_PIN), startTimer, FALLING);
 
-    pinMode(BUZZ, OUTPUT);
-    noTone(BUZZ);
+    pinMode(BUZZER_PIN, OUTPUT);
+    noTone(BUZZER_PIN);
 
     timerDonePlayer.curNote = -1;
     timerDonePlayer.curNoteStartedTs = 0;
