@@ -10,7 +10,7 @@
 #define BUZZER_PIN 12
 
 led4_t clockLed;
-byte display[4] = {NA_CHAR, NA_CHAR, NA_CHAR, NA_CHAR};
+byte display[4] = {charToCode('-'), charToCode('-'), charToCode('-'), charToCode('-')};
 
 volatile bool isTimerOn = false;
 volatile bool shouldPlayTune = false;
@@ -187,10 +187,10 @@ void loop()
             byte secondsLow = timerLeftSec % 10;
 
             setDisplay(
-                digitCodes[minutesHigh],
-                digitCodes[minutesLow],
-                digitCodes[secondsHigh],
-                digitCodes[secondsLow] | isHalfSec);
+                digitToCode(minutesHigh),
+                digitToCode(minutesLow),
+                digitToCode(secondsHigh),
+                digitToCode(secondsLow) | isHalfSec);
         }
         else
         {
@@ -215,13 +215,13 @@ void loop()
     else if (!isTimerOn)
     {
         byte segment0 = timersDone / 1000 % 10;
-        segment0 = segment0 == 0 ? BLANK : digitCodes[segment0];
+        segment0 = segment0 == 0 ? blankDigit() : digitToCode(segment0);
         byte segment1 = timersDone / 100 % 10;
-        segment1 = segment1 == 0 ? BLANK : digitCodes[segment1];
+        segment1 = segment1 == 0 ? blankDigit() : digitToCode(segment1);
         byte segment2 = timersDone / 10 % 10;
-        segment2 = segment2 == 0 ? BLANK : digitCodes[segment2];
+        segment2 = segment2 == 0 ? blankDigit() : digitToCode(segment2);
         byte segment3 = timersDone % 10;
-        segment3 = digitCodes[segment3];
+        segment3 = digitToCode(segment3);
         setDisplay(segment0, segment1, segment2, segment3);
     }
 
