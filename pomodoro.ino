@@ -1,5 +1,7 @@
 #include <pitches.h>
+
 #include "led4.h"
+#include "button.h"
 
 #define CLOCK_DATA_PIN 8
 #define CLOCK_LATCH_PIN 7
@@ -15,6 +17,8 @@
 
 led4_t clockLed;
 byte display[4] = {charToCode('-'), charToCode('-'), charToCode('-'), charToCode('-')};
+
+volatile button_t startButton;
 
 volatile bool isTimerOn = false;
 volatile bool shouldPlayTune = false;
@@ -128,16 +132,9 @@ void play(struct player *player, long curTs)
     }
 }
 
-void startTimer()
+void toggleTimer()
 {
-    noInterrupts();
-
     long curTs = millis();
-    if (curTs < timerSetTs + PRESS_LATENCY)
-    {
-        return;
-    }
-
     if (shouldPlayTune)
     {
         isTimerOn = false;
@@ -152,16 +149,18 @@ void startTimer()
 
     timerDonePlayer.curNote = -1;
     timerDonePlayer.curNoteStartedTs = 0;
+}
 
-    interrupts();
+void refreshStartButton()
+{
+    buttonRefresh(&startButton);
 }
 
 void setup()
 {
     led4Init(&clockLed, CLOCK_DATA_PIN, CLOCK_LATCH_PIN, CLOCK_CLOCK_PIN, display);
-
-    pinMode(START_BUTTON_PIN, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(START_BUTTON_PIN), startTimer, FALLING);
+    buttonInit(&startButton, START_BUTTON_PIN);
+    attachInterrupt(digitalPinToInterrupt(START_BUTTON_PIN), refreshStartButton, CHANGE);
 
     pinMode(BUZZER_PIN, OUTPUT);
     noTone(BUZZER_PIN);
@@ -181,8 +180,17 @@ void setup()
 
 void loop()
 {
-    long curTime = millis();
+    button_state_t startButtonState = buttonStateRead(&startButton);
+    if (startButtonState == CLICK)
+    {
+        toggleTimer();
+    }
+    else if (startButtonState == LONG_PRESS)
+    {
+        timersDone = 0;
+    }
 
+    long curTime = millis();
     if (isTimerOn)
     {
         long elapsedHalfSec = (curTime - timerSetTs) / 500;
@@ -228,9 +236,9 @@ void loop()
         byte segment0 = timersDone / 1000 % 10;
         segment0 = segment0 == 0 ? blankDigit() : digitToCode(segment0);
         byte segment1 = timersDone / 100 % 10;
-        segment1 = segment1 == 0 ? blankDigit() : digitToCode(segment1);
+        segment1 = segment0 == 0 && segment1 == 0 ? blankDigit() : digitToCode(segment1);
         byte segment2 = timersDone / 10 % 10;
-        segment2 = segment2 == 0 ? blankDigit() : digitToCode(segment2);
+        segment2 = segment0 == 0 && segment1 == 0 && segment2 == 0 ? blankDigit() : digitToCode(segment2);
         byte segment3 = timersDone % 10;
         segment3 = digitToCode(segment3);
         setDisplay(segment0, segment1, segment2, segment3);

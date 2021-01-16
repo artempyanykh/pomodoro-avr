@@ -6,6 +6,7 @@
 
 // How long in microseconds we flash a single led segment during each cycle
 #define FLASH_DUR_US 1000UL
+
 // The duration in microseconds of the cycle which consists of flashing all leds and dimmin all leds
 #define CYCLE_DUR_US 14000UL
 
@@ -16,17 +17,12 @@ const byte segmentCodes[] = {
     0b00000001, // right-most segment
 };
 
-typedef struct led4_t
-{
-    uint8_t dataPin;
-    uint8_t latchPin;
-    uint8_t clockPin;
-    byte *data; // 4 byte array, guaranteed by init function
-    uint8_t curSegment;
-    unsigned long cycleStartTs;
-    unsigned long curSegmentTs;
-    bool isSegmentOn;
-} led4_t;
+// Forward decls
+void led4Dim(const led4_t *handle);
+void flashDigit(const led4_t *handle);
+void led4Reset(led4_t *handle);
+
+// Public API
 
 void led4Init(led4_t *handle, uint8_t dataPin, uint8_t latchPin, uint8_t clockPin, byte data[4])
 {
@@ -35,7 +31,7 @@ void led4Init(led4_t *handle, uint8_t dataPin, uint8_t latchPin, uint8_t clockPi
     handle->latchPin = latchPin;
     handle->clockPin = clockPin;
     handle->data = data;
-    resetHandle(handle);
+    led4Reset(handle);
 
     // Init arduino pins
     pinMode(dataPin, OUTPUT);
@@ -55,8 +51,7 @@ void led4Refresh(led4_t *handle)
     // If for some reason the led gets stuck, reset it
     if (curTs - handle->cycleStartTs > 2 * CYCLE_DUR_US)
     {
-        Serial.println("LED4 got stuck");
-        resetHandle(handle);
+        led4Reset(handle);
     }
 
     if (!handle->isSegmentOn)
@@ -195,7 +190,7 @@ void flashDigit(const led4_t *handle)
     digitalWrite(handle->latchPin, HIGH);
 }
 
-void resetHandle(led4_t *handle)
+void led4Reset(led4_t *handle)
 {
     handle->curSegment = 0;
     handle->cycleStartTs = 0;
