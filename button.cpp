@@ -1,13 +1,14 @@
 #include <Arduino.h>
 #include "button.h"
 
-#define DEBOUNCE_DELAY_MS 100UL
+#define DEBOUNCE_DELAY_MS 50UL
 #define LONG_PRESS_DELAY_MS 2000UL
 
-void buttonInit(volatile button_t *handler, byte pin)
+void buttonInit(volatile button_t *handler, byte pin, bool softwareDebounce)
 {
 
     handler->pin = pin;
+    handler->softwareDebounce = softwareDebounce;
     pinMode(pin, INPUT_PULLUP);
     handler->lastDownTs = 0;
     handler->lastUpTs = 0;
@@ -19,7 +20,7 @@ void buttonInit(volatile button_t *handler, byte pin)
 void buttonRefresh(volatile button_t *handler)
 {
     unsigned long curTs = millis();
-    if (curTs - buttonLastChangeTs(handler) > DEBOUNCE_DELAY_MS)
+    if (!handler->softwareDebounce || curTs - buttonLastChangeTs(handler) > DEBOUNCE_DELAY_MS)
     {
         int state = digitalRead(handler->pin) == LOW ? DOWN : UP;
         if (handler->internal_state == UP && state == DOWN)

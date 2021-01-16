@@ -10,6 +10,7 @@ typedef enum button_internal_state_t
 typedef struct button_t
 {
     byte pin;
+    bool softwareDebounce;
     button_internal_state_t internal_state;
     unsigned long lastDownTs;      // in millis
     unsigned long lastUpTs;        // in millis
@@ -23,7 +24,7 @@ typedef enum button_state_t
     CLICK
 } button_state_t;
 
-void buttonInit(volatile button_t *handler, byte pin);
+void buttonInit(volatile button_t *handler, byte pin, bool softwareDebounde);
 void buttonRefresh(volatile button_t *handler);
 button_state_t buttonStateRead(volatile button_t *handler);
 #endif

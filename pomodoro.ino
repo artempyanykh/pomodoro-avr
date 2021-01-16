@@ -159,7 +159,7 @@ void refreshStartButton()
 void setup()
 {
     led4Init(&clockLed, CLOCK_DATA_PIN, CLOCK_LATCH_PIN, CLOCK_CLOCK_PIN, display);
-    buttonInit(&startButton, START_BUTTON_PIN);
+    buttonInit(&startButton, START_BUTTON_PIN, true);
     attachInterrupt(digitalPinToInterrupt(START_BUTTON_PIN), refreshStartButton, CHANGE);
 
     pinMode(BUZZER_PIN, OUTPUT);
