@@ -16,6 +16,9 @@
 
 #define DEBUG_PIN 10
 
+//
+// Setup clock LED
+//
 led4_t clockLed;
 byte display[4] = {charToCode('-'), charToCode('-'), charToCode('-'), charToCode('-')};
 void setDisplay(byte d1, byte d2, byte d3, byte d4)
@@ -26,6 +29,9 @@ void setDisplay(byte d1, byte d2, byte d3, byte d4)
     display[3] = d4;
 }
 
+//
+// Setup start button and control vars
+//
 volatile button_t startButton;
 
 volatile bool isTimerSet = false;
@@ -35,6 +41,9 @@ volatile long timerSetTs = 0L;
 long timerDurationSec = 25 * 60; // 25min
 uint16_t timersDone = 0;
 
+//
+// Setup buzzer to play "timer done" tune
+//
 const note_t marioFlagPole[] = {
     {NOTE_G3, 4},
     {NOTE_C4, 4},
@@ -73,6 +82,10 @@ const note_t marioFlagPole[] = {
 const tune_t marioFlagPoleTune = {marioFlagPole, sizeof(marioFlagPole) / sizeof(marioFlagPole[0])};
 volatile buzzer_t timerCompletedBuzz; // init in setup
 
+//
+// Helper functions / interrupt handlers
+//
+
 void toggleTimer()
 {
     long curTs = millis();
@@ -95,6 +108,10 @@ void refreshStartButton()
 {
     buttonRefresh(&startButton);
 }
+
+//
+// Setup and main loop
+//
 
 void setup()
 {

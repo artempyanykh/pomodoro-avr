@@ -7,8 +7,10 @@
 // How long in microseconds we flash a single led segment during each cycle
 #define FLASH_DUR_US 1000UL
 
-// The duration in microseconds of the cycle which consists of flashing all leds and dimmin all leds
-#define CYCLE_DUR_US 14000UL
+// The duration in microseconds of the cycle which consists of flashing all leds and dimmin all leds.
+// The maximum duration until the LED starts "blinking" to the eye is 14ms.
+// 6ms is enough for the LED to not blink on camera (although varies depending no the amount of light).
+#define CYCLE_DUR_US 6000UL
 
 const byte segmentCodes[] = {
     0b00001000, // left-most segment
